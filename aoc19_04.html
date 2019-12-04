@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<script>
+		"use strict";  
+    
+    function calc() {
+      document.getElementById("result").innerHTML = getResult();      
+    }     
+
+    function getResult() {      
+      let range = input.match(/\d+/g).map(Number); 
+      let pass = [];
+      let truePass = 0;
+      let truePass2 = 0;
+
+      for (let i = range[0]; i <= range[1]; ++i) {
+        pass.push(String(range[0]++).split("").map(Number));
+      }
+
+      for (let i = 0; i < pass.length; ++i) {
+        let decrease = false;
+        let repeat = false; 
+        let double = false;
+        
+        for (let j = 0; j < pass[i].length - 1; ++j) {
+          if (pass[i][j + 1] < pass[i][j]) {
+           decrease = true; 
+          }
+
+          if (pass[i][j + 1] == pass[i][j]) {
+            repeat = true;
+
+            if (pass[i][j - 1] != pass[i][j]) {
+              if (j == pass[i].length - 2 || pass[i][j + 2] != pass[i][j]) {                      double = true;
+              }        
+            }             
+          }
+        }
+
+        if (decrease == false && repeat == true) {          
+          ++truePass;
+        }
+
+        if (decrease == false && double == true) {          
+          ++truePass2;
+        }
+      }
+
+      return truePass + ", " + truePass2;
+    }
+
+let input = "347312-805915";
+
+</script>
+</head>
+<body onload="calc()">  
+  <div id="result"></div>  
+</body>
+</html>
