@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<script>
+		"use strict";  
+    
+    function calc() {
+      document.getElementById("result").innerHTML = getResult();      
+    }     
+
+    function getResult() {      
+      const p = input.match(/-?\d+/g).map(Number);         
+      let highSignal = 0;
+      let output = null;
+
+      for (let A = 0; A <= 4; ++A) {
+        for (let B = 0; B <= 4; ++B) {
+          if (B != A) {  
+            for (let C = 0; C <= 4; ++C) {
+              if (C != B && C != A) {                
+                for (let D = 0; D <= 4; ++D) {
+                  if (D != C && D != B && D != A) {                  
+                    for (let E = 0; E <= 4; ++E) {
+                      if (E != D && E != C && E != B && E != A) {                        
+                        output = runProgramm([...p], [A, 0]);
+                        output = runProgramm([...p], [B, output]);
+                        output = runProgramm([...p], [C, output]);
+                        output = runProgramm([...p], [D, output]);
+                        output = runProgramm([...p], [E, output]);
+                        highSignal = (output > highSignal) ? output : highSignal;                 
+                      }                    
+                    }
+                  }                  
+                }   
+              }                     
+            }
+          }
+        }
+      }    
+    
+      return highSignal + ", " + null;
+    }
+
+    function runProgramm(p, inp) {
+      let output = [];   
+      let ip = 0;
+     
+      while (ip < p.length) {  
+        const [op, p1, p2, p3] = p.slice(ip, ip + 4);
+        const opcode = op % 100;
+        const m1 = Math.floor(op / 100) % 10;
+        const m2 = Math.floor(op / 1000) % 10;
+
+        const get = (par, mode) => mode == 0 ? p[par] : par;
+        let size = 1;     
+
+        if (opcode == 1) { 
+          p[p3] = get(p1, m1) + get(p2, m2);
+          size = 4; 
+
+        } else if (opcode == 2) {
+          p[p3] = get(p1, m1) * get(p2, m2);
+          size = 4;
+
+        } else if (opcode == 3) {
+          p[p1] = inp.shift();
+          size = 2;         
+
+        } else if (opcode == 4) {
+          output.push(get(p1, m1));
+          size = 2;          
+
+        } else if (opcode == 5) {         
+          size = 3;
+
+          if (get(p1, m1) != 0) {         
+            ip = get(p2, m2);
+            size = 0;      
+          } 
+
+        } else if (opcode == 6) {  
+          size = 3;
+
+          if (get(p1, m1) == 0) {         
+            ip = get(p2, m2); 
+            size = 0;   
+          } 
+
+        } else if (opcode == 7) {
+          p[p3] = (get(p1, m1) < get(p2, m2)) ? 1 : 0;
+          size = 4;   
+
+        } else if (opcode == 8) { 
+          p[p3] = (get(p1, m1) == get(p2, m2)) ? 1 : 0;
+          size = 4; 
+
+        } else if (opcode == 99) {
+          return output[output.length - 1];
+        }
+
+        ip += size;
+      }
+    }
+
+let input2 = "3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0";
+
+let input = "3,8,1001,8,10,8,105,1,0,0,21,34,59,68,89,102,183,264,345,426,99999,3,9,102,5,9,9,1001,9,5,9,4,9,99,3,9,101,3,9,9,1002,9,5,9,101,5,9,9,1002,9,3,9,1001,9,5,9,4,9,99,3,9,101,5,9,9,4,9,99,3,9,102,4,9,9,101,3,9,9,102,5,9,9,101,4,9,9,4,9,99,3,9,1002,9,5,9,1001,9,2,9,4,9,99,3,9,1002,9,2,9,4,9,3,9,101,2,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,101,1,9,9,4,9,3,9,102,2,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,1001,9,2,9,4,9,3,9,1001,9,2,9,4,9,3,9,1001,9,2,9,4,9,3,9,102,2,9,9,4,9,99,3,9,1001,9,1,9,4,9,3,9,102,2,9,9,4,9,3,9,102,2,9,9,4,9,3,9,101,1,9,9,4,9,3,9,101,1,9,9,4,9,3,9,102,2,9,9,4,9,3,9,102,2,9,9,4,9,3,9,101,1,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,1001,9,2,9,4,9,99,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,102,2,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,1001,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,101,1,9,9,4,9,3,9,1001,9,1,9,4,9,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,99,3,9,101,1,9,9,4,9,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,1002,9,2,9,4,9,3,9,101,1,9,9,4,9,3,9,101,2,9,9,4,9,99,3,9,1001,9,1,9,4,9,3,9,1001,9,2,9,4,9,3,9,101,1,9,9,4,9,3,9,102,2,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,1002,9,2,9,4,9,3,9,101,1,9,9,4,9,3,9,1001,9,1,9,4,9,3,9,1001,9,2,9,4,9,3,9,1002,9,2,9,4,9,99";
+
+</script>
+</head>
+<body onload="calc()">  
+  <div id="result"></div>  
+</body>
+</html>
