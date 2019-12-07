@@ -7,32 +7,55 @@
     
     function calc() {
       document.getElementById("result").innerHTML = getResult();      
-    }     
+    }   
 
     function getResult() {      
-      const arr = input.split("\n").
-          map(e => ({parentId: e.split(")")[0], id: e.split(")")[1]}));
-      arr.push({parentId: null, id: "COM"});
+      const arr = input.split("\n")
+        .map(e => ({parentId: e.split(")")[0], id: e.split(")")[1]}));
+      
+      arr.push({parentId: null, id: "COM"});    
+      
+      const tree = getTree(arr)[0];  
+      const you = getPath(tree, "YOU");
+      const san = getPath(tree, "SAN");       
 
-      const nest = (items, id = null, link = 'parentId') => 
-          items
-              .filter(item => item[link] === id)
-              .map(item => ({...item, children: nest(items, item.id)}));
+      while (you[0] == san[0]) {
+        you.shift();
+        san.shift();
+      }
 
-      const tree = nest(arr)[0];
+      const sum = getSum(tree, 0);
+      const transfers = you.length + san.length - 2;
+     
+      return sum + ", " + transfers;
+    }
 
-      let sum = getSum(tree, 0);
-   
-      return sum + ", " + null;
+    function getTree(items, id = null, link = 'parentId') {
+      return items.filter(item => item[link] === id)
+                  .map(item => ({...item, children: getTree(items, item.id)}));
+    }  
+
+    function getPath(node, id, path = []) {
+      if (node.id == id) {
+        return path;
+      }
+
+      if (node.children.length == 0) {
+        return undefined;
+      }
+
+      return node.children.map(c => getPath(c, id, [...path, c.id]))
+                          .filter(p => p != undefined)[0];
     }
 
     function getSum(node, depth) {
       let res = 0;
       node.children.forEach(c => res += getSum(c, depth + 1));
+
       return res + depth;
     }
 
-let input = `XNR)9W1
+const input = `XNR)9W1
 VGS)XCW
 WS5)5XM
 T9F)RTN
