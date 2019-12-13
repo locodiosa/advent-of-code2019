@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<script>
+		"use strict";  
+    
+    function calc() {
+      document.getElementById("result").innerHTML = getResult();      
+    }     
+
+    function getResult() {   
+      let map = [];
+      let asteroids = {};
+
+      input.split("\n").forEach((l, y) => {
+        map[y] = [];
+
+        l.split("").forEach((e, x) => {
+          map[y].push(e);
+
+          if (e == "#") {
+            asteroids[y + "," + x] = [y, x];
+          }
+        });
+      });      
+
+      let numberAster = 0;
+      let stationX = null;
+      let stationY = null;
+
+      for (let y = 0; y < map.length; ++y) {
+        for (let x = 0; x < map[y].length; ++x) {
+          if (map[y][x] == "#") {
+            let stX = x;
+            let stY = y;
+            let station = detectAsteroids(stX, stY, asteroids);           
+          
+            if (station[0] > numberAster) {
+              numberAster = station[0];
+              stationX = station[1][1];
+              stationY = station[1][0];
+            } 
+          }          
+        }
+      }
+
+      console.log(stationY + ", " + stationX);
+      console.log(asteroids);
+    
+      return numberAster + ", " + vaporise(asteroids, stationY, stationX);
+    }
+
+    function detectAsteroids(x0, y0, asteroids) {
+      let angles = {};
+       
+      for (let a in asteroids) {
+        let curX = asteroids[a][1];
+        let curY = asteroids[a][0];
+
+        if (x0 != curX || y0 != curY) {
+          let x = x0 - curX;
+          let y = y0 - curY;
+
+          let ang = Math.atan2(y, x);          
+          angles[ang] = asteroids[a];                   
+        }        
+      }
+
+      let numbers = 0;
+
+      for (let a in angles) {
+        ++numbers;
+      }
+
+      return [numbers, [y0, x0]];
+    }
+
+    function vaporise(asteroids, stationY, stationX) {
+      let hit = 0;      
+      let lastAster = null;
+
+      while (hit < 200) {
+        let angles = {};
+
+        for (let a in asteroids) {
+          if (asteroids[a] != undefined) {
+            let curX = asteroids[a][1];
+            let curY = asteroids[a][0];
+
+            if (stationX != curX || stationY != curY) {
+              let x = stationX - curX;
+              let y = stationY - curY;
+
+              let ang = Math.atan2(y, x);          
+              angles[ang] = asteroids[a];                   
+            }
+          }        
+        }
+
+        console.log(angles);
+
+        // надо как-то сделать, чтобы убирал по кругу, начиная сверху
+
+        for (let a in angles) {
+          asteroids[angles[a]] = undefined;
+          ++hit; 
+          lastAster = angles[a]; 
+
+          if (hit == 1) {
+            console.log(lastAster);
+          } 
+
+          if (hit == 200) {
+            //return (lastAster[1] * 100) + lastAster[0];
+            return lastAster;
+          }    
+        }  
+      }
+       
+      
+    }
+
+let input = `.#..##.###...#######
+##.############..##.
+.#.######.########.#
+.###.#######.####.#.
+#####.##.#.##.###.##
+..#####..#.#########
+####################
+#.####....###.#.#.##
+##.#################
+#####.##.###..####..
+..######..##.#######
+####.##.####...##..#
+.#####..#.######.###
+##...#.##########...
+#.##########.#######
+.####.#.###.###.#.##
+....##.##.###..#####
+.#.#.###########.###
+#.#.#.#####.####.###
+###.##.####.##.#..##`;
+
+let input1 = `#.#....#.#......#.....#......####.
+#....#....##...#..#..##....#.##..#
+#.#..#....#..#....##...###......##
+...........##..##..##.####.#......
+...##..##....##.#.....#.##....#..#
+..##.....#..#.......#.#.........##
+...###..##.###.#..................
+.##...###.#.#.......#.#...##..#.#.
+...#...##....#....##.#.....#...#.#
+..##........#.#...#..#...##...##..
+..#.##.......#..#......#.....##..#
+....###..#..#...###...#.###...#.##
+..#........#....#.....##.....#.#.#
+...#....#.....#..#...###........#.
+.##...#........#.#...#...##.......
+.#....#.#.#.#.....#...........#...
+.......###.##...#..#.#....#..##..#
+#..#..###.#.......##....##.#..#...
+..##...#.#.#........##..#..#.#..#.
+.#.##..#.......#.#.#.........##.##
+...#.#.....#.#....###.#.........#.
+.#..#.##...#......#......#..##....
+.##....#.#......##...#....#.##..#.
+#..#..#..#...........#......##...#
+#....##...#......#.###.#..#.#...#.
+#......#.#.#.#....###..##.##...##.
+......#.......#.#.#.#...#...##....
+....##..#.....#.......#....#...#..
+.#........#....#...#.#..#....#....
+.#.##.##..##.#.#####..........##..
+..####...##.#.....##.............#
+....##......#.#..#....###....##...
+......#..#.#####.#................
+.#....#.#..#.###....##.......##.#.`;
+
+</script>
+</head>
+<body onload="calc()">  
+  <div id="result"></div>  
+</body>
+</html>
