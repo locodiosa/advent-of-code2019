@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<script>
+		"use strict";  
+    
+    function calc() {
+      document.getElementById("result").innerHTML = getResult();      
+    }     
+
+    function getResult() {      
+      const prog = input.match(/-?\d+/g).map(Number);             
+      let p = {};
+
+      for (let i = 0; i < prog.length; ++i) {
+        p[i] = prog[i];
+      } 
+
+      let grid = {};
+      let numberOfPanels = 0;  
+      let coord = [0, 0];
+      let currDir = "U";
+      let currColor = 0;
+
+      let counter = 0;
+
+      while (counter < 100) { // когда заканчивать????????????
+        let panels = 0;
+        ++counter; // это чтобы не зависало
+        
+        let outputs = runProgramm(p, currColor);
+
+        currColor = outputs[0][0];
+        let dir = outputs[0][1];
+        p = outputs[1]; // нужно ли??? или каждый раз начальный брать?
+
+        grid[coord] = currColor;
+
+        for (let p in grid) {
+          ++panels;
+        }
+
+        if (panels == numberOfPanels) { // вариант остановки, если не меняется кол-во закраш. панелей
+          counter = 100;
+        }
+
+        numberOfPanels = panels;
+
+        console.log(coord);
+        console.log(currDir);
+        console.log(outputs);
+        console.log(dir);
+
+        if (dir == 0) { // возможно здесь что-то не то (чередуются U и L)
+          if (currDir == "U") {
+            --coord[1];
+            currDir = "L";
+          } else if (currDir == "D") {
+            ++coord[1];
+            currDir = "R";
+          } else if (currDir == "L") {
+            ++coord[0];
+            currDir = "D";
+          } else if (currDir == "R") {
+            --coord[0];
+            currDir = "U";
+          }        
+        } else if (dir == 1) {
+          if (currDir == "U") {
+            ++coord[1];
+            currDir = "R";
+          } else if (currDir == "D") {
+            --coord[1];
+            currDir = "L";
+          } else if (currDir == "L") {
+            --coord[0];
+            currDir = "U";
+          } else if (currDir == "R") {
+            ++coord[0];
+            currDir = "D";
+          }        
+        }  
+      }      
+    
+      return numberOfPanels + ", " + null;
+    }
+
+    function runProgramm(p, inp) {
+      let output = [];   
+      let ip = 0;
+      let rb = 0;
+           
+      while (true) {  
+        const [op, p1, p2, p3] = [p[ip], p[ip + 1], p[ip + 2], p[ip + 3]];
+        const opcode = op % 100;
+        const m1 = Math.floor(op / 100) % 10;
+        const m2 = Math.floor(op / 1000) % 10;
+        const m3 = Math.floor(op / 10000) % 10;
+        
+        let size = 1;     
+
+        if (opcode == 1) { 
+          p[set(p, p3, m3, rb)] = get(p, p1, m1, rb) + get(p, p2, m2, rb);
+          size = 4; 
+
+        } else if (opcode == 2) {       
+          p[set(p, p3, m3, rb)] = get(p, p1, m1, rb) * get(p, p2, m2, rb);
+          size = 4;
+
+        } else if (opcode == 3) {
+          p[set(p, p1, m1, rb)] = inp;
+          size = 2;         
+
+        } else if (opcode == 4) {
+          output.push(get(p, p1, m1, rb)); 
+          size = 2;     
+
+        } else if (opcode == 5) {         
+          size = 3;
+
+          if (get(p, p1, m1, rb) != 0) {         
+            ip = get(p, p2, m2, rb);
+            size = 0;      
+          } 
+
+        } else if (opcode == 6) {  
+          size = 3;
+
+          if (get(p, p1, m1, rb) == 0) {         
+            ip = get(p, p2, m2, rb); 
+            size = 0;   
+          } 
+
+        } else if (opcode == 7) {
+          p[set(p, p3, m3, rb)] = (get(p, p1, m1, rb) < get(p, p2, m2, rb)) ? 1 : 0;
+          size = 4;   
+
+        } else if (opcode == 8) { 
+          p[set(p, p3, m3, rb)] = (get(p, p1, m1, rb) == get(p, p2, m2, rb)) ? 1 : 0;
+          size = 4; 
+
+        } else if (opcode == 9) {
+          rb += get(p, p1, m1, rb);
+          size = 2;
+
+        } else if (opcode == 99) {
+          return [output, p];
+        }
+
+        ip += size;
+      }
+    }
+
+    function get(p, par, mode, rb) {
+      if (mode == 0) {
+        return p[par];
+      }
+
+      if (mode == 1) {
+        return par;
+      }
+
+      if (mode == 2) {
+        return p[par + rb];
+      }
+    }
+
+    function set(p, par, mode, rb) {
+      if (mode == 0) {
+        return par;
+      }
+
+      if (mode == 2) {
+        return par + rb;
+      }
+    }
+
+let input = "3,8,1005,8,336,1106,0,11,0,0,0,104,1,104,0,3,8,102,-1,8,10,1001,10,1,10,4,10,108,1,8,10,4,10,101,0,8,28,1006,0,36,1,2,5,10,1006,0,57,1006,0,68,3,8,102,-1,8,10,1001,10,1,10,4,10,108,0,8,10,4,10,1002,8,1,63,2,6,20,10,1,106,7,10,2,9,0,10,3,8,102,-1,8,10,101,1,10,10,4,10,108,1,8,10,4,10,102,1,8,97,1006,0,71,3,8,1002,8,-1,10,101,1,10,10,4,10,108,1,8,10,4,10,1002,8,1,122,2,105,20,10,3,8,1002,8,-1,10,1001,10,1,10,4,10,108,0,8,10,4,10,101,0,8,148,2,1101,12,10,1006,0,65,2,1001,19,10,3,8,102,-1,8,10,1001,10,1,10,4,10,108,0,8,10,4,10,101,0,8,181,3,8,1002,8,-1,10,1001,10,1,10,4,10,1008,8,0,10,4,10,1002,8,1,204,2,7,14,10,2,1005,20,10,1006,0,19,3,8,102,-1,8,10,101,1,10,10,4,10,108,1,8,10,4,10,102,1,8,236,1006,0,76,1006,0,28,1,1003,10,10,1006,0,72,3,8,1002,8,-1,10,101,1,10,10,4,10,108,0,8,10,4,10,102,1,8,271,1006,0,70,2,107,20,10,1006,0,81,3,8,1002,8,-1,10,1001,10,1,10,4,10,108,1,8,10,4,10,1002,8,1,303,2,3,11,10,2,9,1,10,2,1107,1,10,101,1,9,9,1007,9,913,10,1005,10,15,99,109,658,104,0,104,1,21101,0,387508441896,1,21102,1,353,0,1106,0,457,21101,0,937151013780,1,21101,0,364,0,1105,1,457,3,10,104,0,104,1,3,10,104,0,104,0,3,10,104,0,104,1,3,10,104,0,104,1,3,10,104,0,104,0,3,10,104,0,104,1,21102,179490040923,1,1,21102,411,1,0,1105,1,457,21101,46211964123,0,1,21102,422,1,0,1106,0,457,3,10,104,0,104,0,3,10,104,0,104,0,21101,838324716308,0,1,21101,0,445,0,1106,0,457,21102,1,868410610452,1,21102,1,456,0,1106,0,457,99,109,2,22101,0,-1,1,21101,40,0,2,21101,0,488,3,21101,478,0,0,1106,0,521,109,-2,2105,1,0,0,1,0,0,1,109,2,3,10,204,-1,1001,483,484,499,4,0,1001,483,1,483,108,4,483,10,1006,10,515,1101,0,0,483,109,-2,2105,1,0,0,109,4,2101,0,-1,520,1207,-3,0,10,1006,10,538,21101,0,0,-3,22102,1,-3,1,21202,-2,1,2,21101,0,1,3,21101,557,0,0,1105,1,562,109,-4,2105,1,0,109,5,1207,-3,1,10,1006,10,585,2207,-4,-2,10,1006,10,585,22101,0,-4,-4,1106,0,653,21201,-4,0,1,21201,-3,-1,2,21202,-2,2,3,21102,604,1,0,1106,0,562,21202,1,1,-4,21101,0,1,-1,2207,-4,-2,10,1006,10,623,21102,0,1,-1,22202,-2,-1,-2,2107,0,-3,10,1006,10,645,21202,-1,1,1,21101,0,645,0,106,0,520,21202,-2,-1,-2,22201,-4,-2,-4,109,-5,2105,1,0";
+
+</script>
+</head>
+<body onload="calc()">  
+  <div id="result"></div>  
+</body>
+</html>
